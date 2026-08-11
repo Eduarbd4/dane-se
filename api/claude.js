@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
-      erro: "Método não permitido"
+      error: "Method not allowed"
     });
   }
 
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
     if (!prompt) {
       return res.status(400).json({
-        erro: "Prompt não informado"
+        error: "Prompt not provided"
       });
     }
 
@@ -18,11 +18,11 @@ export default async function handler(req, res) {
 
     if (!apiKey) {
       return res.status(500).json({
-        erro: "ANTHROPIC_API_KEY não configurada"
+        error: "ANTHROPIC_API_KEY not configured"
       });
     }
 
-    const resposta = await fetch(
+    const response = await fetch(
       "https://api.anthropic.com/v1/messages",
       {
         method: "POST",
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
           "anthropic-version": "2023-06-01"
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-sonnet-5",
           max_tokens: 1500,
           messages: [
             {
@@ -44,29 +44,29 @@ export default async function handler(req, res) {
       }
     );
 
-    const dados = await resposta.json();
+    const data = await response.json();
 
-    if (!resposta.ok) {
-      return res.status(resposta.status).json({
-        erro: dados?.error?.message || "Erro na API da Anthropic"
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data?.error?.message || "Anthropic API error"
       });
     }
 
-    const texto =
-      dados.content
+    const text =
+      data.content
         ?.filter(item => item.type === "text")
         ?.map(item => item.text)
         ?.join("\n") || "";
 
     return res.status(200).json({
-      resposta: texto
+      response: text
     });
 
-  } catch (erro) {
-    console.error(erro);
+  } catch (error) {
+    console.error(error);
 
     return res.status(500).json({
-      erro: "Erro interno ao gerar análise"
+      error: "Internal error generating analysis"
     });
   }
 }
